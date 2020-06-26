@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+//using System.Exception;
 using MediatR;
 using Persistence;
 //using Domain;
@@ -31,6 +32,7 @@ namespace Application.Activities
             public async Task<Unit> Handle(Command request,
                     CancellationToken cancellationToken)
             {
+                
                 var activity_x = await _context.Activities.FindAsync(request.Id);
 
                 if (activity_x == null)
@@ -44,11 +46,25 @@ namespace Application.Activities
                 activity_x.City = request.City ?? activity_x.City;
                 activity_x.Venue = request.Venue ?? activity_x.Venue;
 
+                
+                try{    
+                    await _context.SaveChangesAsync();
+                    return Unit.Value;
+
+                }catch(Exception ex){
+                    
+                    throw new Exception("Problem saving changes  {" + ex.ToString() +"}");
+                
+                }
+                /*
+                return null;
                 var success = await _context.SaveChangesAsync() > 0;
 
                 if (success) return Unit.Value;
+                
 
-                throw new Exception("Problem saving changes");
+                throw new Exception("Problem saving changes  {" + success +"}");
+                */
             }
         }
 
