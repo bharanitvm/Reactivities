@@ -1,6 +1,9 @@
 using System;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Errors;
+using FluentValidation;
 //using System.Exception;
 using MediatR;
 using Persistence;
@@ -20,6 +23,18 @@ namespace Application.Activities
             public string City { get; set; }
             public string Venue { get; set; }
         }
+        public class CommandValidator : AbstractValidator<Command>
+        {
+            public CommandValidator()
+            {
+                RuleFor(x => x.Title).NotEmpty();
+                RuleFor(x => x.Description).NotEmpty();
+                RuleFor(x => x.Category).NotEmpty();
+                RuleFor(x => x.Date).NotEmpty();
+                RuleFor(x => x.City).NotEmpty();
+                RuleFor(x => x.Venue).NotEmpty();
+            }
+        }
 
         public class Handler : IRequestHandler<Command>
         {
@@ -32,13 +47,16 @@ namespace Application.Activities
             public async Task<Unit> Handle(Command request,
                     CancellationToken cancellationToken)
             {
-                
+
                 var activity_x = await _context.Activities.FindAsync(request.Id);
 
                 if (activity_x == null)
                 {
                     throw new Exception("Could not find activity");
                 }
+                if (activity_x == null)
+                    throw new RestException(HttpStatusCode.NotFound, new { activity = "Not found" });
+                    
                 activity_x.Title = request.Title ?? activity_x.Title;
                 activity_x.Description = request.Description ?? activity_x.Description;
                 activity_x.Category = request.Category ?? activity_x.Category;
@@ -46,15 +64,18 @@ namespace Application.Activities
                 activity_x.City = request.City ?? activity_x.City;
                 activity_x.Venue = request.Venue ?? activity_x.Venue;
 
-                
-                try{    
+
+                try
+                {
                     await _context.SaveChangesAsync();
                     return Unit.Value;
 
-                }catch(Exception ex){
-                    
-                    throw new Exception("Problem saving changes  {" + ex.ToString() +"}");
-                
+                }
+                catch (Exception ex)
+                {
+
+                    throw new Exception("Problem saving changes  {" + ex.ToString() + "}");
+
                 }
                 /*
                 return null;
