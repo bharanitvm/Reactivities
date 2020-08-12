@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import { IActivity } from "../../../app/models/activity";
 import { format } from "date-fns";
 import ActivityListitemAttendee from "./ActivityListitemAttendee";
-import { link } from "fs";
 
 const ActivityListItem: React.FC<{ activity: IActivity }> = ({ activity }) => {
   const host = activity.attendees.filter((x) => x.isHost)[0];
@@ -13,10 +12,23 @@ const ActivityListItem: React.FC<{ activity: IActivity }> = ({ activity }) => {
       <Segment>
         <Item.Group>
           <Item>
-            <Item.Image size="tiny" circular src={host.image || "/assets/user.png"} />
+            <Item.Image
+              size="tiny"
+              circular
+              src={host.image || "/assets/user.png"}
+              style={{ marginBottom: 3 }}
+            />
             <Item.Content>
-              <Item.Header as={link} to={`/activities/${activity.id}`}>{activity.title}</Item.Header>
-              <Item.Description>Hosted by {host.displayName}</Item.Description>
+              <Item.Header as={Link} to={`/activities/${activity.id}`}>
+                {activity.title}
+              </Item.Header>
+              <Item.Description>
+                Hosted by
+                <Link to={`/profile/${host.userName}`}>
+                  {" "}
+                  {host.displayName}
+                </Link>{" "}
+              </Item.Description>
               {activity.isHost && (
                 <Item.Description>
                   <Label
