@@ -28,8 +28,9 @@ namespace Application.User
             {
                 var user = await _userManager.FindByNameAsync(_userAccessor.GetCurrentUsername());
 
-                return new User{
-                    DisplayName =  user.UserName,
+                return new User
+                {
+                    DisplayName = user.DisplayName,
                     UserName = user.UserName,
                     Token = _jwtGenerator.CreateToken(user),
                     Image = user.Photos.FirstOrDefault(x => x.IsMain)?.Url
