@@ -22,6 +22,7 @@ using AutoMapper;
 using Infrastructure.Photos;
 using System.Threading.Tasks;
 using API.SIgnalR;
+using Application.Profiles;
 
 //using Microsoft.EntityFrameworkCore.useLazyLoadingProxies;
 
@@ -108,6 +109,7 @@ namespace API
             services.AddScoped<IJwtGenerator, JwtGenerator>();
             services.AddScoped<IUserAccessor, UserAccessor>();
             services.AddScoped<IPhotoAccessor, PhotoAccessor>();
+            services.AddScoped<IProfileReader, ProfileReader>();
             services.Configure<CloudinarySettings>(Configuration.GetSection("Cloudinary"));
         }
 

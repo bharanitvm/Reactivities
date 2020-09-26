@@ -36,10 +36,12 @@ export default class ActivityStore {
 
     this.hubConnection
       .start()
-      .then(() => console.log(this.hubConnection?.state))
+      .then(() => console.log(this.hubConnection!.state))
       .then(() => {
         console.log("Attempting to join group");
-        this.hubConnection?.invoke("AddToGroup", activityId);
+        this.hubConnection!.invoke("AddToGroup", activityId).catch((err) =>
+          console.log("Hubconnection invoke error : " + err)
+        );
       })
       .catch((error) => console.log("Error establishing connection", error));
 
@@ -55,10 +57,10 @@ export default class ActivityStore {
   };
 
   @action stopHubConnection = () => {
-    this.hubConnection
-      ?.invoke("RemoveFromGroup", this.activity?.id)
+    this.hubConnection!.invoke("RemoveFromGroup", this.activity?.id)
       .then(() => {
-        this.hubConnection!.stop();
+        //console.log(" trying stop connection ");
+        this.hubConnection!.stop().catch((err) => console.log(err));
       })
       .then(() => console.log("connection stopped"))
       .catch((err) => console.log(err));
