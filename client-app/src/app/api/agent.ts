@@ -5,7 +5,8 @@ import axios, { AxiosResponse } from "axios";
 import { toast } from "react-toastify";
 import { IProfile, IPhoto } from "../models/profile";
 
-axios.defaults.baseURL = "http://localhost:5000/api";
+//axios.defaults.baseURL = "http://localhost:5000/api";
+axios.defaults.baseURL = process.env.REACT_APP_API_URL;
 
 axios.interceptors.request.use(
   (config) => {
@@ -22,8 +23,18 @@ axios.interceptors.response.use(undefined, (error) => {
   if (error.message === "Network Error" && !error.response) {
     toast.error("Network error - make sure API is running!");
   }
-  const { status, data, config } = error.response;
+  const { status, data, config, headers } = error.response;
   if (status === 404) history.push("notfound");
+  if (
+    status === 401 &&
+    headers["www-authenticate"].substring(0, 66) ===
+      'Bearer error="invalid_token", error_description="The token expired'
+  ) {
+    window.localStorage.removeItem("jwt");
+    history.push("/");
+    toast.info("Your session has expired, please login again");
+    //console.log(error.response);
+  }
   if (
     status === 400 &&
     config.method === "get" &&
@@ -39,18 +50,30 @@ axios.interceptors.response.use(undefined, (error) => {
 
 const responseBody = (response: AxiosResponse) => response.data;
 
+/*
 const sleep = (ms: number) => (response: AxiosResponse) =>
   new Promise<AxiosResponse>((resolve) =>
     setTimeout(() => resolve(response), ms)
   );
+*/
 
 const request = {
-  get: (url: string) => axios.get(url).then(sleep(1000)).then(responseBody),
+  get: (url: string) =>
+    axios
+      .get(url) /*.then(sleep(1000))*/
+      .then(responseBody),
   post: (url: string, body: {}) =>
-    axios.post(url, body).then(sleep(1000)).then(responseBody),
+    axios
+      .post(url, body) /*.then(sleep(1000))*/
+      .then(responseBody),
   put: (url: string, body: {}) =>
-    axios.put(url, body).then(sleep(1000)).then(responseBody),
-  del: (url: string) => axios.delete(url).then(sleep(1000)).then(responseBody),
+    axios
+      .put(url, body) /*.then(sleep(1000))*/
+      .then(responseBody),
+  del: (url: string) =>
+    axios
+      .delete(url) /*.then(sleep(1000))*/
+      .then(responseBody),
   postForm: (url: string, file: Blob) => {
     let formData = new FormData();
     formData.append("File", file);
@@ -67,7 +90,7 @@ const Activities = {
     //request.get(`/activities?limit=${limit}&offset=${page ? page * limit! : 0}`), //
     axios
       .get("/activities", { params: params })
-      .then(sleep(1000))
+      /*.then(sleep(1000))*/
       .then(responseBody),
   details: (id: string) => request.get(`/activities/${id}`),
   create: (activity: IActivity) => request.post("/activities", activity),
